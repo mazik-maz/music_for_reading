@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 import torch
 
+
 nltk.download('punkt')
 nltk.download('punkt_tab')
 
