@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
 from typing import List
 import json
@@ -6,6 +6,7 @@ import json
 from chunking import split_text_by_context
 from get_features_from_text import get_features_from_text
 from closest_track import find_closest_track
+from extract_text import extract_text_from_txt
 
 # Load the track database
 with open("data.json", "r") as file:
@@ -19,6 +20,30 @@ class TextInput(BaseModel):
     similarity_threshold: float = 0.5
     max_sentences_per_section: int = 5
     min_sentences_per_section: int = 2
+
+@app.post("/upload-file/")
+async def create_upload_file(uploaded_file: UploadFile = File(...)):
+    try:
+        file_extension = uploaded_file.filename.split('.')[-1].lower()
+        if file_extension == 'txt':
+            text = extract_text_from_txt(await uploaded_file.read())
+        # elif file_extension == 'pdf':
+        #     text = extract_text_from_pdf(uploaded_file.file)
+        # elif file_extension == 'epub':
+        #     text = extract_text_from_epub(uploaded_file.file)
+        # elif file_extension == 'fb2':
+        #     text = extract_text_from_fb2(uploaded_file.file)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file type.")
+        
+        # Now you can process the text as before
+        # For example:
+        sections = split_text_by_context(text)
+        
+        return {"sections": sections}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/split-text/")
 def split_text(input_data: TextInput):
