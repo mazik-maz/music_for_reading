@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import torch
 
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 def get_sentence_embeddings(sentences):
     # Load pretrained model and tokenizer
